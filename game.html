@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Catch the Ball Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background-color: #f0f8ff;
+    }
+    #gameCanvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #222;
+      border: 5px solid #fff;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 24px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+
+    let score = 0;
+    let gravity = 0.3;
+    let bounce = -8;
+
+    let ball = {
+      x: Math.random() * 550 + 25,
+      y: 0,
+      radius: 20,
+      dy: 3,
+      color: 'tomato'
+    };
+
+    let paddle = {
+      x: 250,
+      width: 100,
+      height: 20,
+      color: 'skyblue'
+    };
+
+    document.addEventListener('mousemove', e => {
+      let rect = canvas.getBoundingClientRect();
+      paddle.x = e.clientX - rect.left - paddle.width / 2;
+    });
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = ball.color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawPaddle() {
+      ctx.fillStyle = paddle.color;
+      ctx.fillRect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height);
+    }
+
+    function updateGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      drawPaddle();
+
+      ball.y += ball.dy;
+      ball.dy += gravity;
+
+      // Check for collision with paddle
+      if (
+        ball.y + ball.radius >= canvas.height - paddle.height &&
+        ball.x >= paddle.x &&
+        ball.x <= paddle.x + paddle.width
+      ) {
+        ball.dy = bounce;
+        score++;
+        scoreDisplay.innerText = 'Score: ' + score;
+      }
+
+      // Reset if missed
+      if (ball.y - ball.radius > canvas.height) {
+        alert('Game Over! Final Score: ' + score);
+        score = 0;
+        scoreDisplay.innerText = 'Score: 0';
+        ball.y = 0;
+        ball.x = Math.random() * 550 + 25;
+        ball.dy = 3;
+      }
+
+      requestAnimationFrame(updateGame);
+    }
+
+    updateGame();
+  </script>
+</body>
+</html>
